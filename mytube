@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# 17 -> 360p / 18 -> 720p / 22 -> 1080p / blank -> best quality
+QUALITY='22'
+PLR_option="mpv --no-resume-playback --geometry=70%x70%"
+DIR='/usr/local/bin'
+
+# colors
+c_red='\033[1;31m'
+c_green='\033[1;32m'
+c_yellow='\033[1;33m'
+c_blue='\033[1;34m'
+c_magenta='\033[1;35m'
+c_cyan='\033[1;36m'
+c_reset='\033[0m'
+
+# add channels name && path(compulsory)
+select_channel() {
+while true;
+do
+	printf "${c_cyan}[CHANNEL LIST] :${c_reset}\n\n"
+	cat ${DIR}/mytube | sed '1,/#channels/d' | grep 'NAME=' | sed -e 's/"//g' -e 's/NAME=//' -e 's/)//'
+	printf "${c_green}\nENTER CHANNEL NUMBER OR [Q/q] TO QUIT :${c_reset} " ; read CHANNEL
+	case "$CHANNEL" in
+#----------------------------------------------
+#channels
+#----------------------------------------------
+# Examples:-
+"1") NAME="LukeSmith"
+		path=c/LukeSmithxyz
+		break;;
+"2") NAME="BoQian"
+		path=user/BoQianTheProgrammer
+		break;;
+#---------------------------------------------
+[BbQq]) exit;;
+*) clear ; printf "${c_red}[INVALID CHOICE]\n" ;;
+	esac
+done
+chnl_options
+}
+
+# list the video(s) of a channel
+list_video() {
+		clear ; printf "${c_magenta}[$NAME]\n${c_green}ENTER COUNT :${c_reset} " ; read COUNT ; printf '\n'
+		yt-dlp --no-warnings --get-title --playlist-start 1 --playlist-end $COUNT https://www.youtube.com/$path | cat -b | sed -e 's/^[ \t]*//'
+		printf '\n'
+}
+
+# select and play the video of a channel
+play_video() {
+		printf "${c_green}ENTER VIDEO NUMBER:${c_reset} " ; read NUM
+		if [[ $NUM -eq b || $NUM -eq B ]]; then
+				break ; clear
+		else
+				printf "${c_green}Playing...${c_reset}\n\n"
+				ID=$(yt-dlp -i --no-warning --get-id --playlist-items $NUM https://www.youtube.com/$path/videos)
+				if [ -z "$QUALITY" ]; then
+						$PLR_option https://youtu.be/${ID}
+				else
+						$PLR_option  --ytdl-format=${QUALITY} https://youtu.be/${ID}
+				fi
+		fi
+}
+
+# options for a selected channel
+chnl_options() {
+		clear
+		while true;
+		do
+				printf "${c_cyan}[$NAME] :\n\n${c_yellow}[P/p] PLAY VIDEO\n${c_magenta}[L/l] LIST VIDEO\n${c_red}[C/B] Clear Back\n\n"
+				printf "${c_green}ENTER CHOICE OR [Q/q] TO QUITE :${c_reset} " ; read OPTION
+				case "$OPTION" in
+						[Bb]) clear ; select_channel ;;
+						[Pp]) play_video ;;
+						[Ll]) list_video ;;
+						[Qq]) exit ;;
+						[Cc]) clear ;;
+						   *) clear ; printf "${c_red}[INVALID CHOICE]\n" ;;
+				esac
+		done
+}
+
+clear ; select_channel
