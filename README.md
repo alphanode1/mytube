@@ -1,4 +1,4 @@
-# <p align="center">mytube : a cli tool to watch yt videos using yt-dl</p>
+# <p align="center">mytube : a cli tool to watch yt videos using yt-dlp</p>
 
 ### Let's defeat the yt algorithm
 
@@ -27,7 +27,7 @@ sudo make
 ```
 ## Dependencies
 ```
-- yt-dl
+- yt-dlp
 - mpv
 - grep
 - sed
